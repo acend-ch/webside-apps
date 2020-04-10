@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: acend-svc
+  labels:
+    app: acend
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: acend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acend-deploy
+  labels:
+    app: acend
+spec:
+  selector:
+    matchLabels:
+      app: acend
+  template:
+    metadata:
+      labels:
+        app: acend
+    spec:
+      containers:
+      - image: acend/construction
+        name: acend
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+          name: http
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: acend-ing
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - acend.ch
+    secretName: acend-tls
+  - hosts:
+    - www.acend.ch
+    secretName: www-acend-tls
+  rules:
+  - host: acend.ch
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: acend-svc
+          servicePort: 80
+  - host: www.acend.ch
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: acend-svc
+          servicePort: 80
