@@ -1,2 +1,2 @@
-# webside-apps
-contains our webside stuff
+# website-apps
+contains our website stuff
