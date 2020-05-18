@@ -4,13 +4,12 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
 
 FROM alpine
 LABEL maintainer="acend"
-COPY --from=0 /go/go /usr/local/bin/
-COPY index.html /
+RUN mkdir -p /opt/www/static
+COPY --from=0 /go/go /opt/www/
+COPY index.html /opt/www/static/ 
+COPY check.sh /opt/www/static/ 
 RUN adduser -D web
 
 EXPOSE 5000
 USER web
-CMD [ "/usr/local/bin/go" ]
-
-
-
+CMD [ "/opt/www/go" ]
